@@ -1,7 +1,6 @@
 import '../styles/Contact.css';
 import { useState } from "react";
 import axios from "axios";
-
 import {
   FiMail,
   FiMapPin,
@@ -15,13 +14,14 @@ function Contact() {
     message: ""
   });
 
-  const [loading, setLoading] =
-    useState(false);
-
+  const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState({
     type: "",
     message: ""
   });
+
+  // Get API URL with fallback
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   const handleChange = (e) => {
     setFormData({
@@ -38,67 +38,59 @@ function Contact() {
       message: ""
     });
 
-    const name =
-      formData.name.trim();
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const message = formData.message.trim();
 
-    const email =
-      formData.email.trim();
-
-    const message =
-      formData.message.trim();
-
+    // Validation
     if (name.length < 2) {
       setStatus({
         type: "error",
-        message:
-          "Please enter your name."
+        message: "Please enter your name."
       });
-
       return;
     }
 
-    if (
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-        email
-      )
-    ) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setStatus({
         type: "error",
-        message:
-          "Please enter a valid email address."
+        message: "Please enter a valid email address."
       });
-
       return;
     }
 
     if (message.length < 5) {
       setStatus({
         type: "error",
-        message:
-          "Please enter a message."
+        message: "Please enter a message."
       });
-
       return;
     }
 
     try {
       setLoading(true);
 
-      const response =
-        await axios.post(
-          `${import.meta.env.VITE_API_URL}/api/contacts`,
-          {
-            name,
-            email,
-            message
-          }
-        );
+      console.log('Sending to:', `${API_URL}/api/contacts`); // Debug log
+
+      const response = await axios.post(
+        `${API_URL}/api/contacts`,
+        {
+          name,
+          email,
+          message
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          timeout: 10000 // 10 second timeout
+        }
+      );
 
       if (response.data.success) {
         setStatus({
           type: "success",
-          message:
-            "Your message has been sent successfully. Thank you!"
+          message: "Your message has been sent successfully. Thank you!"
         });
 
         setFormData({
@@ -109,11 +101,23 @@ function Contact() {
       }
 
     } catch (error) {
+      console.error('Contact form error:', error);
+      
+      let errorMessage = "Unable to send your message. Please try again.";
+      
+      if (error.code === 'ECONNABORTED') {
+        errorMessage = "Request timed out. Please check your connection.";
+      } else if (error.response) {
+        // Server responded with error
+        errorMessage = error.response?.data?.message || errorMessage;
+      } else if (error.request) {
+        // Request made but no response
+        errorMessage = "Cannot connect to server. Please make sure the backend is running.";
+      }
+
       setStatus({
         type: "error",
-        message:
-          error.response?.data?.message ||
-          "Unable to send your message. Please try again."
+        message: errorMessage
       });
 
     } finally {
@@ -122,78 +126,43 @@ function Contact() {
   };
 
   return (
-    <section
-      id="contact"
-      className="section contact-section"
-    >
+    <section id="contact" className="section contact-section">
       <div className="container">
-
         <div className="section-heading center">
           <span>Contact</span>
-
-          <h2>
-            Let's Build Something
-            Together
-          </h2>
-
-          <p>
-            Have a project, opportunity or
-            question? Send me a message.
-          </p>
+          <h2>Let's Build Something Together</h2>
+          <p>Have a project, opportunity or question? Send me a message.</p>
         </div>
 
         <div className="contact-grid">
-
           <div className="contact-details">
-
             <div className="contact-detail">
-
               <div className="contact-detail-icon">
                 <FiMail />
               </div>
-
               <div>
                 <span>Email</span>
-
                 <a href="mailto:shrishailchincholi306@gmail.com">
                   shrishailchincholi306@gmail.com
                 </a>
               </div>
-
             </div>
 
             <div className="contact-detail">
-
               <div className="contact-detail-icon">
                 <FiMapPin />
               </div>
-
               <div>
                 <span>Location</span>
-
-                <p>
-                  Kalaburagi,
-                  Karnataka, India
-                </p>
+                <p>Kalaburagi, Karnataka, India</p>
               </div>
-
             </div>
-
           </div>
 
-          <form
-            className="contact-form"
-            onSubmit={handleSubmit}
-          >
-
+          <form className="contact-form" onSubmit={handleSubmit}>
             <div className="form-row">
-
               <div className="form-group">
-
-                <label htmlFor="name">
-                  Name
-                </label>
-
+                <label htmlFor="name">Name</label>
                 <input
                   id="name"
                   name="name"
@@ -204,15 +173,10 @@ function Contact() {
                   autoComplete="name"
                   required
                 />
-
               </div>
 
               <div className="form-group">
-
-                <label htmlFor="email">
-                  Email
-                </label>
-
+                <label htmlFor="email">Email</label>
                 <input
                   id="email"
                   name="email"
@@ -223,17 +187,11 @@ function Contact() {
                   autoComplete="email"
                   required
                 />
-
               </div>
-
             </div>
 
             <div className="form-group">
-
-              <label htmlFor="message">
-                Message
-              </label>
-
+              <label htmlFor="message">Message</label>
               <textarea
                 id="message"
                 name="message"
@@ -243,17 +201,10 @@ function Contact() {
                 onChange={handleChange}
                 required
               />
-
             </div>
 
             {status.message && (
-              <div
-                className={
-                  status.type === "success"
-                    ? "form-message success"
-                    : "form-message error"
-                }
-              >
+              <div className={`form-message ${status.type}`}>
                 {status.message}
               </div>
             )}
@@ -263,19 +214,11 @@ function Contact() {
               className="primary-btn submit-btn"
               disabled={loading}
             >
-
-              {loading
-                ? "Sending..."
-                : "Send Message"}
-
+              {loading ? "Sending..." : "Send Message"}
               <FiSend />
-
             </button>
-
           </form>
-
         </div>
-
       </div>
     </section>
   );

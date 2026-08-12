@@ -1,8 +1,6 @@
 const { Resend } = require("resend");
 
-const resend = new Resend(
-  process.env.RESEND_API_KEY
-);
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const escapeHtml = (text = "") => {
   return text
@@ -22,11 +20,17 @@ const sendContactEmail = async ({
   const safeEmail = escapeHtml(email);
   const safeMessage = escapeHtml(message);
 
-  const { data, error } =
-    await resend.emails.send({
+  try {
+    const { data, error } = await resend.emails.send({
+      // This is the FROM address (your portfolio email)
       from: process.env.EMAIL_FROM,
+      
+      // TO: Your email (you receive the message)
       to: [process.env.EMAIL_TO],
+      
       subject: `New Portfolio Message from ${name}`,
+      
+      // REPLY-TO: Visitor's email (so you can reply to them)
       replyTo: email,
 
       html: `
@@ -95,6 +99,19 @@ const sendContactEmail = async ({
               This message was sent from your portfolio website.
             </p>
 
+            <hr style="
+              border:none;
+              border-top:1px solid #eeeeee;
+              margin:25px 0;
+            ">
+
+            <p style="
+              color:#777;
+              font-size:12px;
+            ">
+              Reply to this email to respond to ${safeName} at ${safeEmail}
+            </p>
+
           </div>
 
         </body>
@@ -111,16 +128,25 @@ Email: ${email}
 Message:
 
 ${message}
+
+---
+Reply to this email to respond to ${name} at ${email}
       `
     });
 
-  if (error) {
-    throw new Error(
-      error.message || "Email sending failed"
-    );
-  }
+    if (error) {
+      console.error('[Resend API Error]:', error);
+      throw new Error(error.message || "Email sending failed");
+    }
 
-  return data;
+    console.log('✅ Email sent successfully to:', process.env.EMAIL_TO);
+    console.log('📧 From visitor:', email);
+    return data;
+
+  } catch (error) {
+    console.error('❌ Email error:', error);
+    throw error;
+  }
 };
 
 module.exports = sendContactEmail;
