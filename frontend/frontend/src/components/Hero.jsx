@@ -8,7 +8,7 @@ const Hero = () => {
         <div className="hero-content">
           <div className="hero-badge">
             <span className="status-dot"></span>
-            Available for opportunities
+            🚀 Building my developer journey
           </div>
 
           <p className="hero-greeting">Hello, I'm</p>
@@ -68,34 +68,9 @@ const Hero = () => {
         </div>
 
         <div className="hero-visual">
-          <div className="hero-circle">
-            <div className="hero-profile">
-              <span>SC</span>
-            </div>
-          </div>
-
-          <div className="floating-card card-one">
-            <span className="card-icon">&lt;/&gt;</span>
-            <div>
-              <strong>MERN Stack</strong>
-              <small>Developer</small>
-            </div>
-          </div>
-
-          <div className="floating-card card-two">
-            <span className="card-icon">✦</span>
-            <div>
-              <strong>Problem Solver</strong>
-              <small>DSA & Development</small>
-            </div>
-          </div>
-
-          <div className="code-decoration code-one">
-            {"{ }"}
-          </div>
-
-          <div className="code-decoration code-two">
-            {"</>"}
+          <div className="hero-circle"></div>
+          <div className="hero-profile">
+            <span>SC</span>
           </div>
         </div>
       </div>
