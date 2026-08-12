@@ -1,5 +1,6 @@
 import '../styles/Hero.css';
-import { FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
+import { FiGithub, FiLinkedin, FiMail, FiArrowRight } from 'react-icons/fi';
+import profilePhoto from '../assets/profile.jpeg';
 
 const Hero = () => {
   return (
@@ -31,7 +32,7 @@ const Hero = () => {
           <div className="hero-buttons">
             <a href="#projects" className="hero-btn primary-btn">
               View My Work
-              <span>↗</span>
+              <FiArrowRight className="btn-icon" />
             </a>
 
             <a href="#contact" className="hero-btn secondary-btn">
@@ -50,7 +51,7 @@ const Hero = () => {
             </a>
 
             <a
-              href="https://www.linkedin.com/in/shrishail-chincholi"
+              href="https://www.linkedin.com/in/shrishailchincholi/"
               target="_blank"
               rel="noreferrer"
               aria-label="LinkedIn"
@@ -68,9 +69,31 @@ const Hero = () => {
         </div>
 
         <div className="hero-visual">
-          <div className="hero-circle"></div>
-          <div className="hero-profile">
-            <span>SC</span>
+          <div className="hero-image-container">
+            <div className="hero-image-wrapper">
+              <img 
+                src={profilePhoto} 
+                alt="Shrishail Chincholi - Full Stack Developer"
+                className="hero-image"
+              />
+              <div className="hero-image-overlay"></div>
+            </div>
+            
+            {/* Decorative Elements */}
+            <div className="floating-badge badge-1">
+              <span className="badge-icon">⚛️</span>
+              <span className="badge-text">React</span>
+            </div>
+            
+            <div className="floating-badge badge-2">
+              <span className="badge-icon">🚀</span>
+              <span className="badge-text">MERN Stack</span>
+            </div>
+            
+            <div className="floating-badge badge-3">
+              <span className="badge-icon">💡</span>
+              <span className="badge-text">Problem Solver</span>
+            </div>
           </div>
         </div>
       </div>

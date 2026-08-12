@@ -6,6 +6,7 @@ import {
   faLocationDot,
   faCode,
 } from '@fortawesome/free-solid-svg-icons';
+import profilePhoto from '../assets/profile2.jpeg';
 
 const About = () => {
   const skills = [
@@ -42,7 +43,11 @@ const About = () => {
           <div className="about-image-wrapper">
             <div className="about-image">
               <div className="about-image-placeholder">
-                <span>SC</span>
+                <img 
+                  src={profilePhoto} 
+                  alt="Shrishail Chincholi - Full Stack Developer"
+                  className="about-profile-image"
+                />
               </div>
             </div>
 

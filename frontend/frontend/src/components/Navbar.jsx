@@ -26,7 +26,7 @@ const Navbar = () => {
           </a>
 
           <a href="#experience" onClick={closeMenu}>
-            Experience
+            Resume
           </a>
 
           <a href="#projects" onClick={closeMenu}>

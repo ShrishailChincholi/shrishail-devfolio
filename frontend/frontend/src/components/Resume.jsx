@@ -1,4 +1,4 @@
-import '../styles/Experience.css';
+import '../styles/Resume.css';
 import {
   FiBookOpen,
   FiCode,
