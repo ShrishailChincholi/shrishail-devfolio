@@ -1,5 +1,5 @@
 import '../styles/Contact.css';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import {
   FiMail,
@@ -20,8 +20,20 @@ function Contact() {
     message: ""
   });
 
-  // ✅ Get API URL from environment variables
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  // ✅ Fix: Get API URL and remove trailing slash if exists
+  const getApiUrl = () => {
+    let url = import.meta.env.VITE_API_URL || window.location.origin || 'http://localhost:5000';
+    // Remove trailing slash if exists
+    url = url.replace(/\/$/, '');
+    return url;
+  };
+
+  const API_URL = getApiUrl();
+
+  // ✅ Log the API URL for debugging
+  useEffect(() => {
+    console.log('🔗 API URL:', API_URL);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -70,10 +82,12 @@ function Contact() {
     try {
       setLoading(true);
 
-      console.log('📤 Sending to:', `${API_URL}/api/contacts`);
+      // ✅ Fix: Construct URL without double slashes
+      const url = `${API_URL}/api/contacts`;
+      console.log('📤 Sending to:', url);
 
       const response = await axios.post(
-        `${API_URL}/api/contacts`,
+        url,
         {
           name,
           email,
@@ -83,7 +97,7 @@ function Contact() {
           headers: {
             'Content-Type': 'application/json',
           },
-          timeout: 10000 // 10 second timeout
+          timeout: 15000
         }
       );
 
@@ -106,13 +120,11 @@ function Contact() {
       let errorMessage = "Unable to send your message. Please try again.";
       
       if (error.code === 'ECONNABORTED') {
-        errorMessage = "⏱️ Request timed out. Please check your connection.";
+        errorMessage = "⏱️ Request timed out. Please try again.";
       } else if (error.response) {
-        // Server responded with error
         errorMessage = error.response?.data?.message || errorMessage;
       } else if (error.request) {
-        // Request made but no response
-        errorMessage = "🔌 Cannot connect to server. Please make sure the backend is running.";
+        errorMessage = "🔌 Cannot connect to server. Please try again later.";
       }
 
       setStatus({

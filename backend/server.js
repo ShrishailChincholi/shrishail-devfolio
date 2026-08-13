@@ -4,7 +4,9 @@ require('dotenv').config();
 // Now import other modules
 const express = require("express");
 const cors = require("cors");
-const path = require("path"); // ✅ For serving frontend
+const path = require("path");
+const fs = require("fs");
+const mongoose = require("mongoose");
 
 const connectDB = require("./config/db");
 const contactRoutes = require("./routes/contactRoutes");
@@ -17,14 +19,34 @@ connectDB();
 const app = express();
 
 // ===== MIDDLEWARE =====
+// CORS - Allow frontend to connect
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'https://shrishail-devfolio.onrender.com',
+  'http://localhost:5173',
+  'http://localhost:3000'
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "*",
-    methods: ["GET", "POST", "PATCH", "DELETE"],
-    credentials: true
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+        callback(null, true);
+      } else {
+        console.log('❌ CORS blocked for origin:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
 
+// Body parsers
 app.use(
   express.json({
     limit: "10kb"
@@ -38,18 +60,27 @@ app.use(
   })
 );
 
-// ===== API ROUTES =====
-app.use("/api/contacts", contactRoutes);
+// ===== LOGGING MIDDLEWARE (for debugging) =====
+app.use((req, res, next) => {
+  console.log(`📝 ${req.method} ${req.url}`);
+  next();
+});
 
+// ===== API ROUTES =====
+// Health check endpoint - MUST be before /api/contacts
 app.get("/api/health", (req, res) => {
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   res.status(200).json({
     success: true,
     message: "Portfolio API is running",
     environment: process.env.NODE_ENV || "development",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    database: dbStatus,
+    mongodb_uri: process.env.MONGO_URI ? 'Set' : 'Not Set'
   });
 });
 
+// API info endpoint
 app.get("/api", (req, res) => {
   res.status(200).json({
     success: true,
@@ -57,43 +88,90 @@ app.get("/api", (req, res) => {
     endpoints: {
       health: "/api/health",
       contacts: "/api/contacts"
-    }
+    },
+    environment: process.env.NODE_ENV || "development"
   });
 });
 
-// ===== SERVE FRONTEND =====
-// Check if we're in production (Render)
+// Contact form routes - THIS MUST BE BEFORE FRONTEND SERVING
+app.use("/api/contacts", contactRoutes);
+
+// ===== TEST ROUTE (for debugging) =====
+app.get("/api/test", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Test route is working!",
+    timestamp: new Date().toISOString()
+  });
+});
+
+// ===== SERVE FRONTEND (PRODUCTION ONLY) =====
 if (process.env.NODE_ENV === 'production') {
-  // Serve static files from frontend/dist
+  // Path to frontend build
   const frontendPath = path.join(__dirname, '../frontend/dist');
   
-  // Check if frontend exists
-  const fs = require('fs');
+  console.log('📁 Frontend path:', frontendPath);
+  
+  // Check if frontend build exists
   if (fs.existsSync(frontendPath)) {
     console.log('✅ Frontend build found, serving static files');
+    
+    // Serve static files
     app.use(express.static(frontendPath));
     
     // All non-API routes go to index.html
     app.get('*', (req, res) => {
+      // Skip API routes - they should have been handled above
+      if (req.path.startsWith('/api/')) {
+        return res.status(404).json({
+          success: false,
+          message: `API endpoint ${req.path} not found`
+        });
+      }
       res.sendFile(path.join(frontendPath, 'index.html'));
     });
   } else {
-    console.log('⚠️ Frontend build not found, API only mode');
+    console.log('⚠️ Frontend build not found at:', frontendPath);
+    console.log('📁 Current directory:', __dirname);
+    console.log('📁 Files in current directory:', fs.readdirSync(__dirname));
+    
     app.get("/", (req, res) => {
       res.status(200).json({
         success: true,
         message: "Portfolio API is running (frontend not built)",
-        environment: process.env.NODE_ENV
+        environment: process.env.NODE_ENV,
+        note: "Build your frontend with: cd frontend && npm run build"
       });
+    });
+    
+    // For any other route, return API info
+    app.get('*', (req, res) => {
+      if (!req.path.startsWith('/api/')) {
+        res.status(200).json({
+          success: true,
+          message: "Portfolio API is running",
+          note: "Frontend not found. Please build the frontend.",
+          endpoints: {
+            health: "/api/health",
+            contacts: "/api/contacts",
+            test: "/api/test"
+          }
+        });
+      }
     });
   }
 } else {
-  // Development - API only
+  // Development mode - API only
   app.get("/", (req, res) => {
     res.status(200).json({
       success: true,
       message: "Portfolio API is running in development mode",
-      environment: "development"
+      environment: "development",
+      endpoints: {
+        health: "/api/health",
+        contacts: "/api/contacts",
+        test: "/api/test"
+      }
     });
   });
 }
@@ -108,7 +186,8 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📁 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 API: http://localhost:${PORT}/api/health`);
+  console.log(`🔗 Health: http://localhost:${PORT}/api/health`);
+  console.log(`📝 Test: http://localhost:${PORT}/api/test`);
   
   if (process.env.NODE_ENV === 'production') {
     console.log(`🌐 Frontend: http://localhost:${PORT}`);
@@ -118,8 +197,10 @@ app.listen(PORT, () => {
 // ===== HANDLE UNCAUGHT ERRORS =====
 process.on('uncaughtException', (error) => {
   console.error('❌ Uncaught Exception:', error.message);
+  console.error(error.stack);
 });
 
 process.on('unhandledRejection', (error) => {
   console.error('❌ Unhandled Rejection:', error.message);
+  console.error(error.stack);
 });
