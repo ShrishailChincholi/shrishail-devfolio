@@ -30,9 +30,7 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
-      
       if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
         callback(null, true);
       } else {
@@ -67,7 +65,7 @@ app.use((req, res, next) => {
 });
 
 // ===== API ROUTES =====
-// Health check endpoint - MUST be before /api/contacts
+// Health check endpoint
 app.get("/api/health", (req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   res.status(200).json({
@@ -75,8 +73,7 @@ app.get("/api/health", (req, res) => {
     message: "Portfolio API is running",
     environment: process.env.NODE_ENV || "development",
     timestamp: new Date().toISOString(),
-    database: dbStatus,
-    mongodb_uri: process.env.MONGO_URI ? 'Set' : 'Not Set'
+    database: dbStatus
   });
 });
 
@@ -93,10 +90,10 @@ app.get("/api", (req, res) => {
   });
 });
 
-// Contact form routes - THIS MUST BE BEFORE FRONTEND SERVING
+// Contact form routes
 app.use("/api/contacts", contactRoutes);
 
-// ===== TEST ROUTE (for debugging) =====
+// Test route
 app.get("/api/test", (req, res) => {
   res.status(200).json({
     success: true,
@@ -107,27 +104,16 @@ app.get("/api/test", (req, res) => {
 
 // ===== SERVE FRONTEND (PRODUCTION ONLY) =====
 if (process.env.NODE_ENV === 'production') {
-  // Path to frontend build
   const frontendPath = path.join(__dirname, '../frontend/dist');
   
   console.log('📁 Frontend path:', frontendPath);
   
-  // Check if frontend build exists
   if (fs.existsSync(frontendPath)) {
     console.log('✅ Frontend build found, serving static files');
-    
-    // Serve static files
     app.use(express.static(frontendPath));
     
-    // All non-API routes go to index.html
-    app.get('*', (req, res) => {
-      // Skip API routes - they should have been handled above
-      if (req.path.startsWith('/api/')) {
-        return res.status(404).json({
-          success: false,
-          message: `API endpoint ${req.path} not found`
-        });
-      }
+    // ✅ FIXED: Use a function instead of '*' string
+    app.get(/^\/(?!api).*/, (req, res) => {
       res.sendFile(path.join(frontendPath, 'index.html'));
     });
   } else {
@@ -144,20 +130,17 @@ if (process.env.NODE_ENV === 'production') {
       });
     });
     
-    // For any other route, return API info
-    app.get('*', (req, res) => {
-      if (!req.path.startsWith('/api/')) {
-        res.status(200).json({
-          success: true,
-          message: "Portfolio API is running",
-          note: "Frontend not found. Please build the frontend.",
-          endpoints: {
-            health: "/api/health",
-            contacts: "/api/contacts",
-            test: "/api/test"
-          }
-        });
-      }
+    app.get(/^\/(?!api).*/, (req, res) => {
+      res.status(200).json({
+        success: true,
+        message: "Portfolio API is running",
+        note: "Frontend not found. Please build the frontend.",
+        endpoints: {
+          health: "/api/health",
+          contacts: "/api/contacts",
+          test: "/api/test"
+        }
+      });
     });
   }
 } else {
