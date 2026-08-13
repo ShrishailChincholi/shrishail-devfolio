@@ -4,14 +4,14 @@ require('dotenv').config();
 // Now import other modules
 const express = require("express");
 const cors = require("cors");
-const path = require("path"); // ✅ ADD THIS for serving frontend
+const path = require("path"); // ✅ For serving frontend
 
 const connectDB = require("./config/db");
 const contactRoutes = require("./routes/contactRoutes");
 const notFound = require("./middleware/notFoundMiddleware");
 const errorHandler = require("./middleware/errorMiddleware");
 
-// Connect to MongoDB
+// ===== CONNECT TO MONGODB =====
 connectDB();
 
 const app = express();
@@ -45,34 +45,55 @@ app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
     message: "Portfolio API is running",
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV || "development",
+    timestamp: new Date().toISOString()
   });
 });
 
 app.get("/api", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "Portfolio API is running"
+    message: "Portfolio API is running",
+    endpoints: {
+      health: "/api/health",
+      contacts: "/api/contacts"
+    }
   });
 });
 
-// ===== SERVE FRONTEND (FOR PRODUCTION) =====
+// ===== SERVE FRONTEND =====
 // Check if we're in production (Render)
 if (process.env.NODE_ENV === 'production') {
   // Serve static files from frontend/dist
   const frontendPath = path.join(__dirname, '../frontend/dist');
-  app.use(express.static(frontendPath));
   
-  // All non-API routes go to index.html
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(frontendPath, 'index.html'));
-  });
+  // Check if frontend exists
+  const fs = require('fs');
+  if (fs.existsSync(frontendPath)) {
+    console.log('✅ Frontend build found, serving static files');
+    app.use(express.static(frontendPath));
+    
+    // All non-API routes go to index.html
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(frontendPath, 'index.html'));
+    });
+  } else {
+    console.log('⚠️ Frontend build not found, API only mode');
+    app.get("/", (req, res) => {
+      res.status(200).json({
+        success: true,
+        message: "Portfolio API is running (frontend not built)",
+        environment: process.env.NODE_ENV
+      });
+    });
+  }
 } else {
   // Development - API only
   app.get("/", (req, res) => {
     res.status(200).json({
       success: true,
-      message: "Portfolio API is running in development mode"
+      message: "Portfolio API is running in development mode",
+      environment: "development"
     });
   });
 }
@@ -92,4 +113,13 @@ app.listen(PORT, () => {
   if (process.env.NODE_ENV === 'production') {
     console.log(`🌐 Frontend: http://localhost:${PORT}`);
   }
+});
+
+// ===== HANDLE UNCAUGHT ERRORS =====
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error.message);
+});
+
+process.on('unhandledRejection', (error) => {
+  console.error('❌ Unhandled Rejection:', error.message);
 });
