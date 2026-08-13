@@ -20,7 +20,7 @@ function Contact() {
     message: ""
   });
 
-  // Get API URL with fallback
+  // ✅ Get API URL from environment variables
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   const handleChange = (e) => {
@@ -70,7 +70,7 @@ function Contact() {
     try {
       setLoading(true);
 
-      console.log('Sending to:', `${API_URL}/api/contacts`); // Debug log
+      console.log('📤 Sending to:', `${API_URL}/api/contacts`);
 
       const response = await axios.post(
         `${API_URL}/api/contacts`,
@@ -90,7 +90,7 @@ function Contact() {
       if (response.data.success) {
         setStatus({
           type: "success",
-          message: "Your message has been sent successfully. Thank you!"
+          message: "✅ Your message has been sent successfully. Thank you!"
         });
 
         setFormData({
@@ -101,18 +101,18 @@ function Contact() {
       }
 
     } catch (error) {
-      console.error('Contact form error:', error);
+      console.error('❌ Contact form error:', error);
       
       let errorMessage = "Unable to send your message. Please try again.";
       
       if (error.code === 'ECONNABORTED') {
-        errorMessage = "Request timed out. Please check your connection.";
+        errorMessage = "⏱️ Request timed out. Please check your connection.";
       } else if (error.response) {
         // Server responded with error
         errorMessage = error.response?.data?.message || errorMessage;
       } else if (error.request) {
         // Request made but no response
-        errorMessage = "Cannot connect to server. Please make sure the backend is running.";
+        errorMessage = "🔌 Cannot connect to server. Please make sure the backend is running.";
       }
 
       setStatus({
@@ -214,7 +214,7 @@ function Contact() {
               className="primary-btn submit-btn"
               disabled={loading}
             >
-              {loading ? "Sending..." : "Send Message"}
+              {loading ? "⏳ Sending..." : "📩 Send Message"}
               <FiSend />
             </button>
           </form>
