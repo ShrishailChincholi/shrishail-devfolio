@@ -135,5 +135,22 @@ export const projects = [
     ],
     github: "https://github.com/ShrishailChincholi/aura-events-platform",
     live: "https://aura-events-platform.onrender.com"
-  }
+  },
+
+  {
+  title: "FoodSprint - Food Delivery Platform",
+  description:
+    "A modern and responsive food delivery platform that allows users to explore restaurants, browse food items, manage their cart, and place orders through a smooth and user-friendly web interface.",
+  technologies: [
+    "React",
+    "JavaScript",
+    "HTML5",
+    "CSS3",
+    "Node.js",
+    "Express.js",
+    "MongoDB"
+  ],
+  github: "https://github.com/ShrishailChincholi/FoodSprint",
+  live: "https://foodsprint-p0oc.onrender.com"
+}
 ];
