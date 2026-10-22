@@ -190,5 +190,43 @@ export const skills = [
     name: "REST APIs", 
     image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postman/postman-original.svg",
     color: "#FF6C37"
-  }
+  },
+
+
+  {
+    period: "August 2026",
+    role: "Full Stack Development Intern",
+    company: "CodeAlpha",
+    type: "Internship",
+    description:
+      "Completed a one-month virtual internship in full-stack development, gaining practical experience in building web applications, implementing features, and improving frontend and backend development skills.",
+    skills: [
+      "React.js",
+      "Node.js",
+      "JavaScript",
+      "MongoDB",
+      "REST APIs",
+      "Web Development"
+    ],
+    icon: "briefcase"
+  },
+
+    {
+    period: "August 2026",
+    role: "Web Development Intern",
+    company: "Sqrock IT Solutions",
+    type: "Internship",
+    description:
+      "Completed a one-month virtual internship focused on full-stack web development. Worked on practical projects, including a food delivery system and a portfolio website, to strengthen frontend and backend development skills.",
+    skills: [
+      "React.js",
+      "Node.js",
+      "JavaScript",
+      "HTML5",
+      "CSS3",
+      "Full Stack Development"
+    ],
+    icon: "briefcase"
+  },
+
 ];
