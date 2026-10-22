@@ -111,7 +111,43 @@ export const achievements = [
     title: "Full Stack Expertise",
     description: "Building end-to-end applications from frontend to backend with modern technologies",
     icon: "tool"
-  }
+  },
+    {
+    period: "August 2026",
+    role: "Full Stack Development Intern",
+    company: "CodeAlpha",
+    type: "Internship",
+    description:
+      "Completed a one-month virtual internship in full-stack development, gaining practical experience in building web applications, implementing features, and improving frontend and backend development skills.",
+    skills: [
+      "React.js",
+      "Node.js",
+      "JavaScript",
+      "MongoDB",
+      "REST APIs",
+      "Web Development"
+    ],
+    icon: "briefcase"
+  },
+
+    {
+    period: "August 2026",
+    role: "Web Development Intern",
+    company: "Sqrock IT Solutions",
+    type: "Internship",
+    description:
+      "Completed a one-month virtual internship focused on full-stack web development. Worked on practical projects, including a food delivery system and a portfolio website, to strengthen frontend and backend development skills.",
+    skills: [
+      "React.js",
+      "Node.js",
+      "JavaScript",
+      "HTML5",
+      "CSS3",
+      "Full Stack Development"
+    ],
+    icon: "briefcase"
+  },
+
 ];
 
 // Technical Skills with image URLs from Devicon CDN
@@ -193,40 +229,5 @@ export const skills = [
   },
 
 
-  {
-    period: "August 2026",
-    role: "Full Stack Development Intern",
-    company: "CodeAlpha",
-    type: "Internship",
-    description:
-      "Completed a one-month virtual internship in full-stack development, gaining practical experience in building web applications, implementing features, and improving frontend and backend development skills.",
-    skills: [
-      "React.js",
-      "Node.js",
-      "JavaScript",
-      "MongoDB",
-      "REST APIs",
-      "Web Development"
-    ],
-    icon: "briefcase"
-  },
-
-    {
-    period: "August 2026",
-    role: "Web Development Intern",
-    company: "Sqrock IT Solutions",
-    type: "Internship",
-    description:
-      "Completed a one-month virtual internship focused on full-stack web development. Worked on practical projects, including a food delivery system and a portfolio website, to strengthen frontend and backend development skills.",
-    skills: [
-      "React.js",
-      "Node.js",
-      "JavaScript",
-      "HTML5",
-      "CSS3",
-      "Full Stack Development"
-    ],
-    icon: "briefcase"
-  },
 
 ];
